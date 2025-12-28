@@ -8,6 +8,10 @@ unzip "./pup.zip" -d "./" > /dev/null 2>&1
 pup="./pup"
 #Setup APKEditor for install combine split apks
 wget -q -O ./APKEditor.jar https://github.com/REAndroid/APKEditor/releases/download/V1.4.5/APKEditor-1.4.5.jar
+if [ ! -f ./APKEditor.jar ]; then
+    red_log "[-] Failed to download APKEditor.jar"
+    exit 1
+fi
 APKEditor="./APKEditor.jar"
 
 #################################################
@@ -207,7 +211,10 @@ get_apk() {
         fi
         if [[ $5 == "Bundle" ]]; then
             green_log "[+] Merge splits apk to standalone apk"
-            java -jar $APKEditor m -i ./download/$2.apkm -o ./download/$2.apk > /dev/null 2>&1
+            if ! java -jar $APKEditor m -i ./download/$2.apkm -o ./download/$2.apk; then
+                red_log "[-] Failed to merge $2.apkm to standalone apk"
+                exit 1
+            fi
         elif [[ $5 == "Bundle_extract" ]]; then
             unzip "./download/$base_apk" -d "./download/$(basename "$base_apk" .apkm)" > /dev/null 2>&1
         fi
@@ -250,7 +257,10 @@ get_apk() {
 	fi
 	if [[ $5 == "Bundle" ]]; then
 		green_log "[+] Merge splits apk to standalone apk"
-		java -jar $APKEditor m -i ./download/$2.apkm -o ./download/$2.apk > /dev/null 2>&1
+		if ! java -jar $APKEditor m -i ./download/$2.apkm -o ./download/$2.apk; then
+			red_log "[-] Failed to merge $2.apkm to standalone apk"
+			exit 1
+		fi
 	elif [[ $5 == "Bundle_extract" ]]; then
 		unzip "./download/$base_apk" -d "./download/$(basename "$base_apk" .apkm)" > /dev/null 2>&1
 	fi
@@ -289,7 +299,10 @@ get_apkpure() {
 	fi
 	if [[ $4 == "Bundle" ]]; then
 		green_log "[+] Merge splits apk to standalone apk"
-		java -jar $APKEditor m -i ./download/$2.xapk -o ./download/$2.apk > /dev/null 2>&1
+		if ! java -jar $APKEditor m -i ./download/$2.xapk -o ./download/$2.apk; then
+			red_log "[-] Failed to merge $2.xapk to standalone apk"
+			exit 1
+		fi
 	elif [[ $4 == "Bundle_extract" ]]; then
 		unzip "./download/$base_apk" -d "./download/$(basename "$base_apk" .xapk)" > /dev/null 2>&1
 	fi
@@ -345,7 +358,10 @@ patch() {
 split_editor() {
     if [[ -z "$3" || -z "$4" ]]; then
         green_log "[+] Merge splits apk to standalone apk"
-        java -jar $APKEditor m -i "./download/$1" -o "./download/$1.apk" > /dev/null 2>&1
+        if ! java -jar $APKEditor m -i "./download/$1" -o "./download/$1.apk"; then
+            red_log "[-] Failed to merge $1 to standalone apk"
+            exit 1
+        fi
         return 0
     fi
     IFS=' ' read -r -a include_files <<< "$4"
@@ -369,7 +385,10 @@ split_editor() {
     done
 
     green_log "[+] Merge splits apk to standalone apk"
-    java -jar $APKEditor m -i ./download/$2 -o ./download/$2.apk > /dev/null 2>&1
+    if ! java -jar $APKEditor m -i ./download/$2 -o ./download/$2.apk; then
+        red_log "[-] Failed to merge $2 to standalone apk"
+        exit 1
+    fi
 }
 
 #################################################
